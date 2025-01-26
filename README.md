@@ -8,8 +8,11 @@
 <img src="logo.png" alt="logo" width="200"/>
 
 `Effconnpy` is a Python library for advanced causal inference and connectivity analysis in time series data, offering both bivariate and multivariate approaches.
+The toolbox assumes that neuroimging data (e.g. from Nifti files) have been already pre-processed e.g. with fMRI-prep, and parcellated, therefore the time series have been saved in text files as .tsv
+and can easily be loaded in a dataframe.
 
 ## Bivariate Causality Analysis
+![Alt Text](https://en.wikipedia.org/wiki/File:GrangerCausalityIllustration.svg)
 
 Two core classes provide bivariate causal inference methods:
 
