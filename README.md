@@ -66,6 +66,20 @@ import numpy as np
 data = np.random.rand(100, 3)
 analyzer = CausalityAnalyzer(data)
 results = analyzer.causality_test(method='granger')
+print(results)
+```
+and for the multivariate case:
+
+```python
+import numpy as np
+from effconnpy import MultivariateGrangerCausality
+# Generate example data
+np.random.seed(42)
+data = np.random.randn(100, 3)
+# Run analysis
+mgc = MultivariateGrangerCausality(data)
+results = mgc.multivariate_granger_causality(max_lag=1)
+print(results)
 ```
 
 ## To be done
