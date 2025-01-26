@@ -12,7 +12,7 @@ The toolbox assumes that neuroimging data (e.g. from Nifti files) have been alre
 and can easily be loaded into a dataframe.
 
 ## Bivariate Causality Analysis
-![Alt Text](https://upload.wikimedia.org/wikipedia/commons/7/7d/GrangerCausalityIllustration.svg)
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/GrangerCausalityIllustration.svg" alt="GCwikipedia" width="400"/>
 
 Two core classes provide bivariate causal inference methods:
 
