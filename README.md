@@ -90,13 +90,19 @@ binary_matrix = create_connectivity_matrix(results, threshold=0.05, metric='p_va
 2. Generate API documentation with Sphinx
 3. Add extensions with own works as [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
 and Reservoir Computing Causality ([End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
-Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398)) Please refer to the individual github for those for now.
+Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398)) Please refer to the individual github's repos for those for now.
+
+## Citation
+If you use or expand this package, please cite the related papers
+For the bivariate analysis ([End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
+Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398))
+For the multivariate analysis  [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
 
 
 ## Contributing
 
-Contributions welcome! Please read our contributing guidelines before submitting pull requests.
-Currently disabled, just open issues and I will follow up
+Contributions welcome! Please read the contributing guidelines before submitting pull requests.
+Or just open issues and I will follow up
 
 ## License
 
