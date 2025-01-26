@@ -5,7 +5,7 @@
 
 ## Overview
 
-![logo](logo.png)
+<img src="logo.png" alt="logo" width="400"/>
 
 `effconnpy` is a Python library for advanced causal inference and connectivity analysis in time series data, offering both bivariate and multivariate approaches.
 
