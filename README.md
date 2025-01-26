@@ -57,7 +57,7 @@ N.B. The multivariate implementations are not considered state-of-the-art and ar
 pip install effconnpy
 ```
 
-## Quick Example
+## Quick Examples
 
 ```python
 from effconnpy import CausalityAnalyzer
@@ -82,6 +82,7 @@ mgc = MultivariateGrangerCausality(data)
 results = mgc.multivariate_granger_causality(max_lag=1)
 print(results)
 #Create a connectivity matrix with 1s if the p-val < 0.05
+binary_matrix = create_connectivity_matrix(results, threshold=0.05, metric='p_value')
 ```
 
 ## To be done
