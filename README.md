@@ -2,7 +2,7 @@
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/yourusername/effconnpy/main)
-Current stable version = 0.1.5
+Current stable version = 0.1.12
 
 ## Overview
 
