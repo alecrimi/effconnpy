@@ -67,6 +67,7 @@ data = np.random.rand(100, 3)
 analyzer = CausalityAnalyzer(data)
 results = analyzer.causality_test(method='granger')
 print(results)
+binary_matrix = create_connectivity_matrix(results, threshold=0.05, metric='p_value')
 ```
 and for the multivariate case:
 
@@ -80,6 +81,7 @@ data = np.random.randn(100, 3)
 mgc = MultivariateGrangerCausality(data)
 results = mgc.multivariate_granger_causality(max_lag=1)
 print(results)
+#Create a connectivity matrix with 1s if the p-val < 0.05
 ```
 
 ## To be done
