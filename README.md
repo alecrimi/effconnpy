@@ -61,7 +61,7 @@ pip install effconnpy
 
 ```python
 from effconnpy import CausalityAnalyzer
-
+import numpy as np
 # Generate sample time series
 data = np.random.rand(100, 3)
 analyzer = CausalityAnalyzer(data)
