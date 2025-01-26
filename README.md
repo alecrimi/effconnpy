@@ -70,9 +70,10 @@ results = analyzer.causality_test(method='granger')
 
 ## To be done
 1. Automatic selection of lags
-2. Extension with own work as [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
+2. Generate API documentation with Sphinx
+3. Add extensions with own works as [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
 and Reservoir Computing Causality ([End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
-Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398))
+Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398)) Please refer to the individual github for those for now.
 
 
 ## Contributing
