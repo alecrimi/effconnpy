@@ -1,7 +1,8 @@
-# effconnpy
+# Effconnpy
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/yourusername/effconnpy/main)
+Current stable version = 0.1.5
 
 ## Overview
 
@@ -60,7 +61,6 @@ pip install effconnpy
 
 ```python
 from effconnpy import CausalityAnalyzer
-import numpy as np
 
 # Generate sample time series
 data = np.random.rand(100, 3)
