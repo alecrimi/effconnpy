@@ -1,15 +1,13 @@
 import numpy as np
 import pandas as pd
 from typing import Union, List, Optional
-import pymc3 as pm
-import arviz as az
 import networkx as nx
 import dowhy
 from sklearn.preprocessing import StandardScaler
-from causalnex.network import BayesianNetwork
-from causalnex.structure import StructureModel
-from causalnex.structure.notears import from_pandas
-from .causality_analyzer import CausalityAnalyzer
+from sklearn.decomposition import FactorAnalysis
+from sklearn.linear_model import LinearRegression
+from scipy.stats import pearsonr
+from .analyzers import CausalityAnalyzer
 
 class ExtendedCausalityAnalyzer(CausalityAnalyzer):
     def __init__(self, data: Union[np.ndarray, pd.DataFrame, List[np.ndarray]]):
@@ -24,80 +22,81 @@ class ExtendedCausalityAnalyzer(CausalityAnalyzer):
         # Convert to DataFrame for some methods
         self.df = pd.DataFrame(self.data)
     
-    def dynamic_bayesian_network(self, max_lag: int = 1, threshold: float = 0.3):
+    def dynamic_bayesian_network(self, max_lag: int = 1, correlation_threshold: float = 0.3):
         """
-        Construct Dynamic Bayesian Network
+        Construct Dynamic Bayesian Network using NetworkX
         
         Args:
             max_lag: Maximum number of time lags to consider
-            threshold: Correlation threshold for edge creation
+            correlation_threshold: Correlation threshold for edge creation
         
         Returns:
-            Bayesian Network structure
+            Directed graph representing causal relationships
         """
-        # Create structure model
-        sm = StructureModel()
+        # Create directed graph
+        dbn = nx.DiGraph()
         
-        # Iterate through lags
-        for lag in range(1, max_lag + 1):
-            # Create lagged features
-            lagged_df = pd.DataFrame()
-            for col in self.df.columns:
+        # Create lagged features
+        lagged_df = pd.DataFrame()
+        for col in self.df.columns:
+            for lag in range(1, max_lag + 1):
                 lagged_df[f"{col}_lag_{lag}"] = self.df[col].shift(lag)
-            
-            # Combine original and lagged data
-            combined_df = pd.concat([self.df, lagged_df], axis=1).dropna()
-            
-            # Learn structure
-            structure = from_pandas(combined_df, w_threshold=threshold)
-            
-            # Add edges to structure model
-            for edge in structure.edges():
-                sm.add_edge(edge[0], edge[1])
         
-        # Create Bayesian Network
-        bn = BayesianNetwork(sm)
+        # Combine original and lagged data
+        combined_df = pd.concat([self.df, lagged_df], axis=1).dropna()
         
-        return bn
+        # Compute correlations and create edges
+        for col1 in self.df.columns:
+            for col2 in self.df.columns:
+                if col1 != col2:
+                    # Check current and lagged correlations
+                    for lag in range(1, max_lag + 1):
+                        corr, p_value = pearsonr(
+                            combined_df[col1], 
+                            combined_df[f"{col2}_lag_{lag}"]
+                        )
+                        
+                        # Add edge if correlation exceeds threshold
+                        if abs(corr) > correlation_threshold:
+                            dbn.add_edge(col2, col1, weight=abs(corr), lag=lag)
+        
+        return dbn
     
     def structural_equation_modeling(self):
         """
-        Perform Structural Equation Modeling
+        Perform Structural Equation Modeling using Factor Analysis and Linear Regression
         
         Returns:
-            SEM model results and parameters
+            Dictionary containing model parameters and fit statistics
         """
         # Standardize data
         scaler = StandardScaler()
         scaled_data = scaler.fit_transform(self.data)
         
-        # Use PyMC3 for SEM
-        with pm.Model() as sem_model:
-            # Latent variables
-            latent_vars = {}
-            for i in range(self.num_series):
-                latent_vars[f'latent_{i}'] = pm.Normal(f'latent_{i}', 0, 1)
-            
-            # Structural relationships
-            observations = {}
-            for i in range(self.num_series):
-                observations[f'obs_{i}'] = pm.Normal(
-                    f'obs_{i}', 
-                    mu=sum(latent_vars.values()),  # Simple summed latent effect
-                    sigma=1
-                )
-            
-            # Observe the data
-            pm.Normal('likelihood', mu=observations, observed=scaled_data)
+        # Factor Analysis to estimate latent variables
+        fa = FactorAnalysis(n_components=min(self.num_series, 3), random_state=42)
+        latent_factors = fa.fit_transform(scaled_data)
         
-        # Sample from the model
-        with sem_model:
-            trace = pm.sample(2000, return_inferencedata=True)
+        # Fit linear relationships between latent factors and observed variables
+        models = []
+        r2_scores = []
+        coefficients = []
+        
+        for i in range(self.num_series):
+            model = LinearRegression()
+            model.fit(latent_factors, scaled_data[:, i])
+            
+            models.append(model)
+            r2_scores.append(model.score(latent_factors, scaled_data[:, i]))
+            coefficients.append(model.coef_)
         
         return {
-            'model': sem_model,
-            'trace': trace,
-            'summary': az.summary(trace)
+            'latent_factors': latent_factors,
+            'factor_loadings': fa.components_,
+            'models': models,
+            'r2_scores': r2_scores,
+            'coefficients': coefficients,
+            'explained_variance_ratio': fa.explained_variance_ratio_
         }
     
     def causal_discovery_dowhy(self, treatment_var: int = 0, outcome_var: int = 1):
@@ -140,35 +139,59 @@ class ExtendedCausalityAnalyzer(CausalityAnalyzer):
     
     def dynamic_causal_modeling(self):
         """
-        Dynamic Causal Modeling (DCM)
+        Dynamic Causal Modeling using state space representation and Kalman filtering
         
         Returns:
-            DCM model results
+            Dictionary containing model parameters and state estimates
         """
-        # Basic DCM implementation using PyMC3
-        with pm.Model() as dcm_model:
-            # State transitions
-            x = pm.GaussianRandomWalk('state', sigma=1, shape=self.num_series)
-            
-            # Observation model
-            obs_sigma = pm.HalfNormal('obs_sigma', sigma=1)
-            obs = pm.Normal('obs', mu=x, sigma=obs_sigma, observed=self.data)
+        n_timesteps = len(self.data)
         
-        # Sample from the model
-        with dcm_model:
-            trace = pm.sample(2000, return_inferencedata=True)
+        # Initialize state space matrices
+        state_dim = self.num_series
+        obs_dim = self.num_series
+        
+        # Simple state transition matrix (identity + small coupling)
+        A = np.eye(state_dim) + 0.1 * np.random.randn(state_dim, state_dim)
+        
+        # Observation matrix (identity)
+        C = np.eye(obs_dim)
+        
+        # Initialize state estimates
+        x_est = np.zeros((n_timesteps, state_dim))
+        P_est = np.zeros((n_timesteps, state_dim, state_dim))
+        
+        # Process and observation noise covariances
+        Q = np.eye(state_dim) * 0.1
+        R = np.eye(obs_dim) * 0.1
+        
+        # Forward pass (Kalman filter)
+        x_est[0] = np.zeros(state_dim)
+        P_est[0] = np.eye(state_dim)
+        
+        for t in range(1, n_timesteps):
+            # Predict
+            x_pred = A @ x_est[t-1]
+            P_pred = A @ P_est[t-1] @ A.T + Q
+            
+            # Update
+            K = P_pred @ C.T @ np.linalg.inv(C @ P_pred @ C.T + R)
+            x_est[t] = x_pred + K @ (self.data[t] - C @ x_pred)
+            P_est[t] = (np.eye(state_dim) - K @ C) @ P_pred
         
         return {
-            'model': dcm_model,
-            'trace': trace,
-            'summary': az.summary(trace)
+            'state_estimates': x_est,
+            'state_covariances': P_est,
+            'transition_matrix': A,
+            'observation_matrix': C,
+            'process_noise': Q,
+            'observation_noise': R
         }
     
     def causality_test(self, 
-                       method: str = 'granger', 
-                       lag: Optional[int] = None, 
-                       verbose: bool = False, 
-                       **kwargs):
+                      method: str = 'granger', 
+                      lag: Optional[int] = None, 
+                      verbose: bool = False, 
+                      **kwargs):
         """
         Extended causality test method
         

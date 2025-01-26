@@ -95,3 +95,40 @@ class CausalityAnalyzer:
             raise ValueError(f"Method {method} not supported. Choose from {list(methods.keys())}")
         
         return methods[method.lower()](lag=lag, verbose=verbose)
+        
+        
+    def create_connectivity_matrix_GC(results, threshold=0.05, metric='p_value'):
+    """
+    Convert Granger causality results to connectivity matrix
+    
+    Args:
+        results: Dictionary of Granger causality results
+        threshold: Significance threshold for p-values (default=0.05)
+        metric: Which metric to use ('p_value' or 'f_statistic')
+    
+    Returns:
+        numpy array: Connectivity matrix where entry [i,j] represents causality from i to j
+    """
+    # Get number of nodes from the results
+    nodes = set()
+    for key in results.keys():
+        source, target = map(int, key.split(' → '))
+        nodes.add(source)
+        nodes.add(target)
+    n_nodes = len(nodes)
+    
+    # Initialize connectivity matrix
+    connectivity_matrix = np.zeros((n_nodes, n_nodes))
+    
+    # Fill matrix based on selected metric
+    for connection, stats in results.items():
+        source, target = map(int, connection.split(' → '))
+        
+        if metric == 'p_value':
+            # For p-values: connection exists if p < threshold
+            connectivity_matrix[source, target] = 1 if stats['p_value'] < threshold else 0
+        else:
+            # For F-statistic: use the F-value directly
+            connectivity_matrix[source, target] = stats['f_statistic']
+    
+    return connectivity_matrix
