@@ -1,6 +1,6 @@
 
 import numpy as np
-from causal_analysis import CausalityAnalyzer
+from effconnpy import CausalityAnalyzer, ExtendedCausalityAnalyzer 
 
 # Create sample data
 data = np.random.rand(100, 3)  # 3 time series
