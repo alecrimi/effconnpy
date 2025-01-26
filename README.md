@@ -31,19 +31,21 @@ Extended methods include:
 Three specialized multivariate approaches:
 
 ### 1. Multivariate Granger Causality
-- Based on methodology by Barnett & Seth
+- Based on methodology by Barnett & Seth, Journal of Neuroscience Methods 2014
 - VAR model-based causality inference
 - Log-likelihood ratio testing
 
 ### 2. Multivariate Convergent Cross-Mapping (CCM)
-- Inspired by Nithya & Tangirala
+- Inspired by Nithya & Tangirala, ICC 2019
 - Nonlinear causality detection
 - Network-based causal relationship visualization
 
 ### 3. Multivariate Transfer Entropy
-- Methodology from Duan et al.
+- Methodology from Duan et al. 2022
 - Information-theoretic causality measure
 - Supports conditional transfer entropy
+
+N.B. The multivariate implementations are not considered state-of-the-art and are not fully tested, please report any error or bug.
 
 ## Installation
 
