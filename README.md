@@ -14,11 +14,10 @@
 Two core classes provide bivariate causal inference methods:
 
 ### 1. CausalityAnalyzer
-- **Approach**: Granger Causality
-- Methods:
-  - Standard Granger Causality test
-  - Supports multiple time series
-  - Computes directional causality
+Basic methods include:
+- Bivariate Granger Causality
+- Bivariate Transfer Entropy
+- Bivariate Convergent Cross Mapping 
 
 ### 2. ExtendedCausalityAnalyzer
 Extended methods include:
@@ -32,19 +31,16 @@ Extended methods include:
 Three specialized multivariate approaches:
 
 ### 1. Multivariate Granger Causality
-![Multivariate GC](multivariate_gc.png)
 - Based on methodology by Barnett & Seth
 - VAR model-based causality inference
 - Log-likelihood ratio testing
 
 ### 2. Multivariate Convergent Cross-Mapping (CCM)
-![Multivariate CCM](multivariate_ccm.png)
 - Inspired by Nithya & Tangirala
 - Nonlinear causality detection
 - Network-based causal relationship visualization
 
 ### 3. Multivariate Transfer Entropy
-![Multivariate TE](multivariate_te.png)
 - Methodology from Duan et al.
 - Information-theoretic causality measure
 - Supports conditional transfer entropy
