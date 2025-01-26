@@ -5,6 +5,6 @@ scipy
 copent
 networkx
 dowhy
-pymc3
-arviz
-causalnex
+sklearn
+arviz 
+typing

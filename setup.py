@@ -2,11 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name="effconnpy",  # Replace with your package name
-    version="0.1.0",  # Initial version
+    version="0.1.12",  # Initial version
     description="A package for causal inference and statistical modeling in brain time series",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",  # Use Markdown for the README
-    author="Your Name",
+    author="Alessandro Crimi",
     author_email="alecrimi@agh.edu.pl",
     url="https://github.com/alecrimi/effconnpy",  # Link to your project
     packages=find_packages(),  # Automatically find packages
@@ -20,7 +20,6 @@ setup(
         "dowhy",
         "pymc3",
         "arviz",
-        "causalnex",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
