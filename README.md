@@ -91,12 +91,47 @@ binary_matrix = create_connectivity_matrix(results, threshold=0.05, metric='p_va
 3. Add extensions with own works as [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
 and Reservoir Computing Causality ([End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
 Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398)) Please refer to the individual github's repos for those for now.
+4. Add High-order autoregressor Granger Causality
 
 ## Citation
 If you use or expand this package, please cite the related papers
 For the bivariate analysis ([End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
 Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398))
 For the multivariate analysis  [Structurally constrained Granger causality A. Crimi Neuroimage 2021}(https://www.sciencedirect.com/science/article/pii/S1053811921005644)
+
+## Inspirations
+Code is based on those papers
+
+1. Convergent Cross-Mapping
+Sugihara, George; May, Robert; Ye, Hao; Hsieh, Chih-hao; Deyle, Ethan; Fogarty, Michael; Munch, Stephan (2012). "Detecting Causality in Complex Ecosystems". Science. 338 (6106): 496–500. 
+
+2. Multivariate Granger Causality
+Seth, A. K., Barrett, A. B., & Barnett, L. (2015). Granger causality analysis in neuroscience and neuroimaging. Journal of Neuroscience Methods, 261, 120–137.
+Porting of Simplified code from Matlab
+
+3.Dynamic Bayesian Network
+Murphy, K. P. (2002). Dynamic Bayesian networks: Representation, inference and learning. Ph.D. Thesis, UC Berkeley.
+Simplification of pomegranate Python library.
+
+
+4. Structural Equation Modeling
+Bollen, K. A. (1989). Structural Equations with Latent Variables. Wiley.
+Porting of Lavaan R code
+
+5. DoWhy Causal Discovery
+Shanmugam, K., Kalainathan, D., Goudet, O., & Lopez-Paz, D. (2020). DoWhy: An End-to-End Library for Causal Inference. ArXiv Paper
+Refactoring of DoWhy Library in Python without Pymc3.
+ 
+ 
+6. Dynamic Causal Modeling
+Friston, K. (2007). Statistical Parametric Mapping: The Analysis of Functional Brain Images. Elsevier.
+Refactoring Matlab code without SPM 
+
+7. Multivariate Convergent Cross Mapping
+S Nithya and Arun K Tangirala. (2019) “Multivariable Causal Analysis of Nonlinear Dynamical Systems using. Convergent Cross Mapping”
+
+8. Multivariate Transfer Entropy
+Ziheng Duan; Haoyan Xu; Yida Huang; Jie Feng; Yueyang Wang (2022) Multivariate Time Series Forecasting with Transfer Entropy Graph
 
 
 ## Contributing
