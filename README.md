@@ -102,35 +102,33 @@ For the multivariate analysis  [Structurally constrained Granger causality A. Cr
 ## Inspirations
 Code is based on those papers
 
-1. Convergent Cross-Mapping
+###1. Convergent Cross-Mapping
 Sugihara, George; May, Robert; Ye, Hao; Hsieh, Chih-hao; Deyle, Ethan; Fogarty, Michael; Munch, Stephan (2012). "Detecting Causality in Complex Ecosystems". Science. 338 (6106): 496–500. 
 
-2. Multivariate Granger Causality
+###2. Multivariate Granger Causality
 Seth, A. K., Barrett, A. B., & Barnett, L. (2015). Granger causality analysis in neuroscience and neuroimaging. Journal of Neuroscience Methods, 261, 120–137.
 Porting of Simplified code from Matlab
 
-3.Dynamic Bayesian Network
+###3. Dynamic Bayesian Network
 Murphy, K. P. (2002). Dynamic Bayesian networks: Representation, inference and learning. Ph.D. Thesis, UC Berkeley.
 Simplification of pomegranate Python library.
 
-
-4. Structural Equation Modeling
+###4. Structural Equation Modeling
 Bollen, K. A. (1989). Structural Equations with Latent Variables. Wiley.
 Porting of Lavaan R code
 
-5. DoWhy Causal Discovery
+###5. DoWhy Causal Discovery
 Shanmugam, K., Kalainathan, D., Goudet, O., & Lopez-Paz, D. (2020). DoWhy: An End-to-End Library for Causal Inference. ArXiv Paper
 Refactoring of DoWhy Library in Python without Pymc3.
  
- 
-6. Dynamic Causal Modeling
+###6. Dynamic Causal Modeling
 Friston, K. (2007). Statistical Parametric Mapping: The Analysis of Functional Brain Images. Elsevier.
 Refactoring Matlab code without SPM 
 
-7. Multivariate Convergent Cross Mapping
+###7. Multivariate Convergent Cross Mapping
 S Nithya and Arun K Tangirala. (2019) “Multivariable Causal Analysis of Nonlinear Dynamical Systems using. Convergent Cross Mapping”
 
-8. Multivariate Transfer Entropy
+###8. Multivariate Transfer Entropy
 Ziheng Duan; Haoyan Xu; Yida Huang; Jie Feng; Yueyang Wang (2022) Multivariate Time Series Forecasting with Transfer Entropy Graph
 
 
