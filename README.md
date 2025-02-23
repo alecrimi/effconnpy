@@ -103,6 +103,30 @@ analyzer = MultivariateGrangerCausality(data)
 results = analyzer.multivariate_granger_causality()
 print(results)
 ```
+Indeed, there is also a causal time series generator script to generate ground-truth time series which can be complemented by random or other time series:
+
+```python
+    from effconnpy import timeseriesgenerator
+    # Create an instance of the generator
+    generator = TimeSeriesGenerator()    
+    # Generate some example data
+    n_points = 1000
+    
+    # Lorenz system
+    t, x, y, z = generator.lorenz_system(n_points)
+    
+    # Coupled logistic map
+    logistic_x, logistic_y = generator.coupled_logistic_map(n_points)
+    
+    # Kuramoto oscillators
+    kura1, kura2 = generator.kuramoto_oscillators(n_points)
+    
+    # AR process
+    ar_x, ar_y = generator.ar_process(n_points)
+    
+    # Nonlinear coupled system
+    nl_x, nl_y = generator.nonlinear_coupled_system(n_points)
+```
 
 ## To be done
 1. Automatic selection of lags
