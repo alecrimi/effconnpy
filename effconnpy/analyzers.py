@@ -179,67 +179,60 @@ class CausalityAnalyzer:
         
         return methods[method.lower()](lag=lag, verbose=verbose)
 
-def create_connectivity_matrix_GC(results, threshold=0.05, metric='p_value'):
+def create_connectivity_matrix(results: dict, method: str = 'granger', threshold: float = None) -> np.ndarray:
     """
-    Convert Granger causality results to connectivity matrix
+    Create a connectivity matrix from causality analysis results.
     
     Args:
-        results: Dictionary of Granger causality results
-        threshold: Significance threshold for p-values (default=0.05)
-        metric: Which metric to use ('p_value' or 'f_statistic')
+        results: Dictionary of causality analysis results
+        method: Type of causality analysis ('granger', 'te', or 'ccm')
+        threshold: Threshold value for determining connections
+            - For Granger: p-value threshold (default=0.05)
+            - For Transfer Entropy: minimum TE value (default=0.1)
+            - For CCM: minimum correlation threshold (default=0.5)
     
     Returns:
         numpy array: Connectivity matrix where entry [i,j] represents causality from i to j
     """
+    # Set default thresholds based on method
+    if threshold is None:
+        thresholds = {
+            'granger': 0.05,  # Standard statistical significance
+            'te': 0.1,       # Common threshold for transfer entropy
+            'ccm': 0.5       # Moderate correlation threshold
+        }
+        threshold = thresholds.get(method.lower(), 0.05)
+    
     # Get number of nodes from the results
     nodes = set()
     for key in results.keys():
-        source, target = map(int, key.split(' → '))
-        nodes.add(source)
-        nodes.add(target)
+        if isinstance(key, str) and '→' in key:
+            source, target = map(int, key.split(' → '))
+            nodes.add(source)
+            nodes.add(target)
     n_nodes = len(nodes)
     
     # Initialize connectivity matrix
     connectivity_matrix = np.zeros((n_nodes, n_nodes))
     
-    # Fill matrix based on selected metric
-    for connection, stats in results.items():
-        source, target = map(int, connection.split(' → '))
-        
-        if metric == 'p_value':
-            # For p-values: connection exists if p < threshold
-            connectivity_matrix[source, target] = 1 if stats['p_value'] < threshold else 0
-        else:
-            # For F-statistic: use the F-value directly
-            connectivity_matrix[source, target] = stats['f_statistic']
-    
-    return connectivity_matrix
-    
-    
-def create_connectivity_matrix_TE(results, threshold=0.1):
-    """
-    Convert Transfer Entropy results to a connectivity matrix.
-    
-    Args:
-        results: Dictionary of Transfer Entropy results
-        threshold: Minimum TE value required for connection (default=0.1)
-    
-    Returns:
-        numpy array: Connectivity matrix where entry [i, j] represents TE from i to j
-    """
-    nodes = set()
-    for key in results.keys():
-        source, target = map(int, key.split(' → '))
-        nodes.add(source)
-        nodes.add(target)
-    
-    n_nodes = len(nodes)
-    connectivity_matrix = np.zeros((n_nodes, n_nodes))
-    
-    for connection, te_value in results.items():
-        source, target = map(int, connection.split(' → '))
-        
-        # Apply threshold to determine connectivity
-        connectivity_matrix[source, target] = 1 if te_value > threshold else 0
+    # Fill matrix based on method
+    for connection, value in results.items():
+        if isinstance(connection, str) and '→' in connection:
+            source, target = map(int, connection.split(' → '))
+            
+            if method.lower() == 'granger':
+                # For Granger: check p-value against threshold
+                connectivity_matrix[source, target] = 1 if value['p_value'] < threshold else 0
+                
+            elif method.lower() == 'te':
+                # For Transfer Entropy: compare TE value against threshold
+                connectivity_matrix[source, target] = 1 if value > threshold else 0
+                
+            elif method.lower() == 'ccm':
+                # For CCM: compare correlation value against threshold
+                connectivity_matrix[source, target] = 1 if value > threshold else 0
+            
+            else:
+                raise ValueError(f"Method {method} not supported. Choose from: 'granger', 'te', or 'ccm'")
     
     return connectivity_matrix
