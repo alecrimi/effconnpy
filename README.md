@@ -81,6 +81,8 @@ from effconnpy import create_connectivity_matrix
 import numpy as np
 
 # Generate sample time series 
+#The first 2 time series are related by a logistic causal mapping, 
+#while the third is random and has no causal relationship with the others
 # Parameters
 T = 100  # Number of time steps
 x = np.zeros(T)
