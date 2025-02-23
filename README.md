@@ -120,3 +120,6 @@ Currently disabled, just open issues and I will follow up
 
 MIT License
 
+[![Star History Chart](https://api.star-history.com/svg?repos=alecrimi/effconnpy&type=Date)](https://star-history.com/#alecrimi/effconnpy)
+
+
