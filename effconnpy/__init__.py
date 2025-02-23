@@ -1,4 +1,4 @@
-from .analyzers import CausalityAnalyzer
+from .analyzers import CausalityAnalyzer, create_connectivity_matrix_TE , create_connectivity_matrix_GC
 from .extendedanalyzers import ExtendedCausalityAnalyzer
 from .multivariateGC import MultivariateGrangerCausality
 from .multivariateTE import MultivariateTransferEntropy

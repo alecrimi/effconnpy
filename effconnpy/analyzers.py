@@ -4,6 +4,8 @@ from typing import Union, List, Optional
 from .utils import validate_input
 import statsmodels.api as sm
 import scipy.stats as stats
+from scipy.spatial.distance import pdist, squareform
+from copent import transent as te
 
 class CausalityAnalyzer:
     def __init__(self, data: Union[np.ndarray, pd.DataFrame, List[np.ndarray]]):
@@ -39,7 +41,7 @@ class CausalityAnalyzer:
         if self.num_series == 1:
             return {"error": "Granger Causality requires multiple time series"}
         
-        # Multivariate Granger Causality
+        # Bivariate Granger Causality
         for i in range(self.num_series):
             for j in range(self.num_series):
                 if i != j:
@@ -69,13 +71,92 @@ class CausalityAnalyzer:
                         print(f"p-value: {p_value}\n")
         
         return results
+
+    def transfer_entropy(self, lag: int = 1, verbose: bool = False) -> dict:
+        """
+        Perform Transfer Entropy test using copent library with time delay
+        
+        Args:
+            lag: Number of time steps to delay the source series
+            verbose: Whether to print detailed results
+        
+        Returns:
+            Dictionary of Transfer Entropy test results
+        """
+        results = {}
+        
+        # Univariate case
+        if self.num_series == 1:
+            return {"error": "Transfer Entropy requires multiple time series"}
+        
+        # Bivariate Transfer Entropy
+        for i in range(self.num_series):
+            for j in range(self.num_series):
+                if i != j:
+                    # Create time-shifted version of the source series
+                    source = self.data[:-lag, j]  # Earlier values
+                    target = self.data[lag:, i]   # Later values
+                    
+                    # Calculate transfer entropy with the shifted data
+                    entropy_value = te(source, target)
+                    
+                    results[f"{j} → {i}"] = entropy_value
+                    
+                    if verbose:
+                        print(f"Transfer Entropy from Series {j} to Series {i}: {entropy_value}\n")
+        
+        return results
+    
+    def convergent_cross_mapping(self, lag: int = 1, verbose: bool = False) -> dict:
+        """
+        Perform Convergent Cross Mapping 
+        
+        Args:
+            lag: Number of lags to use
+            verbose: Whether to print detailed results
+        
+        Returns:
+            Dictionary of Convergent Cross Mapping results
+        """
+        results = {}
+        
+        # Univariate case
+        if self.num_series == 1:
+            return {"error": "Convergent Cross Mapping requires multiple time series"}
+        
+        # Bivariate Cross Mapping
+        for i in range(self.num_series):
+            for j in range(self.num_series):
+                if i != j:
+                    # Embed time series
+                    def embed(x, lag):
+                        n = len(x)
+                        return np.column_stack([x[k:-lag+k] for k in range(lag)])
+                    
+                    # Embed both series
+                    x_embed = embed(self.data[:, i], lag)
+                    y_embed = embed(self.data[:, j], lag)
+                    
+                    # Calculate distances
+                    x_dist = squareform(pdist(x_embed))
+                    y_dist = squareform(pdist(y_embed))
+                    
+                    # Calculate cross mapping skill
+                    skill = np.corrcoef(x_dist.flatten(), y_dist.flatten())[0, 1]
+                    
+                    results[f"{j} → {i}"] = skill
+                    
+                    if verbose:
+                        print(f"Convergent Cross Mapping from Series {j} to Series {i}: {skill}\n")
+        
+        return results
     
     def causality_test(self, method: str = 'granger', lag: Optional[int] = None, verbose: bool = False) -> dict:
         """
         Perform causality test based on selected method
         
         Args:
-            method: Causality test method ('granger')
+            method: Causality test method ('granger', 'transfer_entropy', 'ccm')
             lag: Number of lags (default: 1)
             verbose: Whether to print detailed results
         
@@ -88,16 +169,17 @@ class CausalityAnalyzer:
         
         # Select and run appropriate causality test
         methods = {
-            'granger': self.granger_causality
+            'granger': self.granger_causality,
+            'transfer_entropy': self.transfer_entropy,
+            'ccm': self.convergent_cross_mapping
         }
         
         if method.lower() not in methods:
             raise ValueError(f"Method {method} not supported. Choose from {list(methods.keys())}")
         
         return methods[method.lower()](lag=lag, verbose=verbose)
-        
-        
-    def create_connectivity_matrix_GC(results, threshold=0.05, metric='p_value'):
+
+def create_connectivity_matrix_GC(results, threshold=0.05, metric='p_value'):
     """
     Convert Granger causality results to connectivity matrix
     
@@ -130,5 +212,34 @@ class CausalityAnalyzer:
         else:
             # For F-statistic: use the F-value directly
             connectivity_matrix[source, target] = stats['f_statistic']
+    
+    return connectivity_matrix
+    
+    
+def create_connectivity_matrix_TE(results, threshold=0.1):
+    """
+    Convert Transfer Entropy results to a connectivity matrix.
+    
+    Args:
+        results: Dictionary of Transfer Entropy results
+        threshold: Minimum TE value required for connection (default=0.1)
+    
+    Returns:
+        numpy array: Connectivity matrix where entry [i, j] represents TE from i to j
+    """
+    nodes = set()
+    for key in results.keys():
+        source, target = map(int, key.split(' → '))
+        nodes.add(source)
+        nodes.add(target)
+    
+    n_nodes = len(nodes)
+    connectivity_matrix = np.zeros((n_nodes, n_nodes))
+    
+    for connection, te_value in results.items():
+        source, target = map(int, connection.split(' → '))
+        
+        # Apply threshold to determine connectivity
+        connectivity_matrix[source, target] = 1 if te_value > threshold else 0
     
     return connectivity_matrix
