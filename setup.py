@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="effconnpy",  # Replace with your package name
-    version="0.1.19",  # Initial version
+    version="0.1.22",  # Initial version
     description="A package for causal inference and statistical modeling in brain time series",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",  # Use Markdown for the README

@@ -60,16 +60,44 @@ pip install effconnpy
 ## Quick Example
 
 ```python
-from effconnpy import CausalityAnalyzer  , create_connectivity_matrix_TE
+from effconnpy import CausalityAnalyzer  , create_connectivity_matrix 
 import numpy as np
 # Generate sample time series
 data = np.random.rand(100, 3)
 analyzer = CausalityAnalyzer(data)
 results = analyzer.causality_test(method='granger')
 print(results)
-binary_matrix =  create_connectivity_matrix(results, method = 'granger') 
 
+binary_matrix =  create_connectivity_matrix(results, method = 'granger') 
 print(binary_matrix)
+```
+
+
+## Multivariate GC Example using causal logistic maps
+
+```python
+from effconnpy.multivariateGC import MultivariateGrangerCausality  
+from effconnpy import create_connectivity_matrix 
+import numpy as np
+
+# Generate sample time series 
+# Parameters
+T = 100  # Number of time steps
+x = np.zeros(T)
+y = np.zeros(T)
+# Initial conditions
+x[0] = 0.5
+y[0] = 0.5
+# Iterate the system
+for t in range(T - 1):
+    x[t + 1] = x[t] * (3.8 - 3.8 * x[t])
+    y[t + 1] = y[t] * (3.1 - 3.1 * y[t] - 0.8 * x[t])
+z = np.random.rand(100)  
+data = np.vstack((x, y,z)).T   
+
+analyzer = MultivariateGrangerCausality(data)
+results = analyzer.multivariate_granger_causality()
+print(results)
 ```
 
 ## To be done
