@@ -87,3 +87,21 @@ Currently disabled, just open issues and I will follow up
 
 MIT License
 
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/alecrimi">
+        <img src="https://avatars.githubusercontent.com/u/16406658?v=4" width="100px;" alt="username1"/>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/KuznetsovIllya">
+        <img src="https://avatars.githubusercontent.com/u/10212879?v=4&format=png" width="100px;" alt="username2"/>
+  
+      </a>
+    </td>
+  </tr>
+</table>
+
