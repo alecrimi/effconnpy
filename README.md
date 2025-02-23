@@ -80,28 +80,11 @@ Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 
 
 ## Contributing
 
-Contributions welcome! Please read our contributing guidelines before submitting pull requests.
-Currently disabled, just open issues and I will follow up
+Contributions welcome! Please follow standard contributing guidelines before submitting pull requests.
+Start posting issues and commenting you would like to be a contributor.
 
 ## License
 
 MIT License
 
-## Contributors
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/alecrimi">
-        <img src="https://avatars.githubusercontent.com/u/16406658?v=4" width="100px;" style="border-radius: 50%;" alt="alecrimi" />
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/KuznetsovIllya">
-        <img src="https://avatars.githubusercontent.com/u/10212879?v=4&format=png" width="100px;" style="border-radius: 50%;" alt="KuznetsovIllya"   />
-  
-      </a>
-    </td>
-  </tr>
-</table>
 
