@@ -60,7 +60,7 @@ pip install effconnpy
 ## Quick Example
 
 ```python
-from effconnpy import CausalityAnalyzer  , create_connectivity_matrix_TE
+from effconnpy import CausalityAnalyzer  , create_connectivity_matrix_GC
 import numpy as np
 # Generate sample time series
 data = np.random.rand(100, 3)
