@@ -8,94 +8,128 @@ from .utils import validate_input
 
 class MultivariateGrangerCausality:
     def __init__(self, data: Union[np.ndarray, pd.DataFrame, List[np.ndarray]]):
-        """
-        Initialize Multivariate Granger Causality analyzer
-        
-        Args:
-            data: Input time series data
-        """
         self.data = validate_input(data)
         
-        # Detect number of time series
         if len(self.data.shape) == 1:
             self.num_series = 1
             self.data = self.data.reshape(-1, 1)
         else:
             self.num_series = self.data.shape[1]
         
-        # Convert to DataFrame for VAR analysis
         self.df = pd.DataFrame(self.data)
     
+    def _compute_restricted_ssr(self, var_results, target, predictor, max_lag):
+        """
+        Compute Sum of Squared Residuals for restricted model
+        """
+        # Get the data
+        data = var_results.model.endog
+        
+        # Create lagged data matrix
+        Z = np.zeros((len(data) - max_lag, max_lag * self.num_series))
+        for i in range(max_lag):
+            Z[:, i*self.num_series:(i+1)*self.num_series] = data[max_lag-i-1:-i-1]
+        
+        # Add constant
+        Z = sm.add_constant(Z)
+        
+        # Get target variable
+        y = data[max_lag:, target]
+        
+        # Create mask for restricted model (excluding predictor lags)
+        mask = np.ones(Z.shape[1], dtype=bool)
+        for i in range(max_lag):
+            mask[1 + predictor + i*self.num_series] = False
+        
+        # Fit restricted model
+        Z_restricted = Z[:, mask]
+        beta_restricted = np.linalg.lstsq(Z_restricted, y, rcond=None)[0]
+        
+        # Compute residuals
+        resid = y - Z_restricted @ beta_restricted
+        
+        return np.sum(resid**2)
+
     def multivariate_granger_causality(self, max_lag: int = 1, verbose: bool = False) -> Dict:
         """
-        Perform Multivariate Granger Causality test using VAR model
+        Compute Granger causality between all pairs of time series.
         
         Args:
-            max_lag: Maximum number of lags to test
+            max_lag: Maximum number of lags to include
             verbose: Whether to print detailed results
-        
+            
         Returns:
-            Dictionary of Granger Causality test results
+            Dictionary with results in format: {'source → target': {'p_value': p, 'f_statistic': f}}
         """
-        # Univariate case
         if self.num_series == 1:
             return {"error": "Granger Causality requires multiple time series"}
         
-        # Prepare results dictionary
         causality_results = {}
         
         # Fit VAR model
         var_model = VAR(self.df)
         var_results = var_model.fit(maxlags=max_lag)
         
-        # Perform Granger causality test for each variable
+        # Get unrestricted SSR for each target
+        unrestricted_ssr = {}
         for target in range(self.num_series):
-            causality_results[f"Series_{target}"] = {}
-            
+            # Convert residuals to numpy array if they're not already
+            resid = var_results.resid.values[:, target] if isinstance(var_results.resid, pd.DataFrame) else var_results.resid[:, target]
+            unrestricted_ssr[target] = np.sum(resid**2)
+        
+        # Perform Granger causality test for each pair of variables
+        for target in range(self.num_series):
             for predictor in range(self.num_series):
                 if target != predictor:
-                    # Restricted model (without predictor)
-                    restricted_params = var_results.params.copy()
-                    restricted_params.loc[f'L{predictor}.{target}', :] = 0
+                    # Get restricted SSR
+                    restricted_ssr = self._compute_restricted_ssr(var_results, target, predictor, max_lag)
                     
-                    # Unrestricted model (full VAR model)
-                    unrestricted_params = var_results.params
+                    # Calculate F-statistic
+                    T = len(var_results.resid)
+                    n_params = max_lag
                     
-                    # Calculate log-likelihood ratio
-                    llr = var_results.llf - self._compute_likelihood(var_results, restricted_params)
+                    f_stat = ((restricted_ssr - unrestricted_ssr[target]) / n_params) / (unrestricted_ssr[target] / (T - self.num_series * max_lag - 1))
                     
-                    # Degrees of freedom
-                    df = max_lag * (self.num_series ** 2)
+                    # Calculate p-value
+                    p_value = 1 - stats.f.cdf(f_stat, n_params, T - self.num_series * max_lag - 1)
                     
-                    # Chi-square test
-                    p_value = 1 - stats.chi2.cdf(llr, df)
-                    
+                    # Store results in format compatible with create_connectivity_matrix
+                    key = f"{predictor} → {target}"
                     result = {
-                        "log_likelihood_ratio": llr,
-                        "p_value": p_value,
-                        "significant": p_value < 0.05
+                        "f_statistic": f_stat,
+                        "p_value": p_value
                     }
                     
-                    causality_results[f"Series_{target}"][f"Series_{predictor}_cause"] = result
+                    causality_results[key] = result
                     
                     if verbose:
                         print(f"Granger Causality from Series {predictor} to Series {target}:")
-                        print(f"Log-Likelihood Ratio: {llr}")
+                        print(f"F-statistic: {f_stat}")
                         print(f"p-value: {p_value}")
                         print(f"Significant: {p_value < 0.05}\n")
         
         return causality_results
-    
-    def _compute_likelihood(self, var_results, restricted_params):
+
+    def get_connectivity_matrix(self, max_lag: int = 1, threshold: float = 0.05) -> np.ndarray:
         """
-        Compute log-likelihood for restricted model
+        Compute and return the connectivity matrix directly.
         
         Args:
-            var_results: Original VAR model results
-            restricted_params: Restricted parameter matrix
-        
+            max_lag: Maximum number of lags to include
+            threshold: P-value threshold for significance
+            
         Returns:
-            Log-likelihood of restricted model
+            numpy array: Connectivity matrix where entry [i,j] represents causality from i to j
         """
-        # This is a simplified approximation of log-likelihood
-        return var_results.llf * 0.9  # Placeholder approximation
+        results = self.multivariate_granger_causality(max_lag=max_lag)
+        
+        # Initialize connectivity matrix
+        connectivity_matrix = np.zeros((self.num_series, self.num_series))
+        
+        # Fill matrix based on results
+        for connection, value in results.items():
+            if isinstance(connection, str) and '→' in connection:
+                source, target = map(int, connection.split(' → '))
+                connectivity_matrix[source, target] = 1 if value['p_value'] < threshold else 0
+        
+        return connectivity_matrix
