@@ -60,14 +60,15 @@ pip install effconnpy
 ## Quick Example
 
 ```python
-from effconnpy import CausalityAnalyzer  , create_connectivity_matrix_GC
+from effconnpy import CausalityAnalyzer  , create_connectivity_matrix_TE
 import numpy as np
 # Generate sample time series
 data = np.random.rand(100, 3)
 analyzer = CausalityAnalyzer(data)
 results = analyzer.causality_test(method='granger')
 print(results)
-binary_matrix =  create_connectivity_matrix_GC(results, threshold=0.1)
+binary_matrix =  create_connectivity_matrix(results, method = 'granger') 
+
 print(binary_matrix)
 ```
 
@@ -80,11 +81,10 @@ Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 
 
 ## Contributing
 
-Contributions welcome! Please follow standard contributing guidelines before submitting pull requests.
-Start posting issues and commenting you would like to be a contributor.
+Contributions welcome! Please read our contributing guidelines before submitting pull requests.
+Currently disabled, just open issues and I will follow up
 
 ## License
 
 MIT License
-
 
