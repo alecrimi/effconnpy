@@ -8,3 +8,6 @@ dowhy
 sklearn
 arviz 
 typing
+
+dipy==1.8
+fury==0.12

@@ -12,7 +12,7 @@
 
 `Effconnpy` is a Python library for advanced causal inference and connectivity analysis in time series data, offering both bivariate and multivariate approaches.
 The toolbox assumes that neuroimging data (e.g. from Nifti files) have been already pre-processed e.g. with fMRI-prep, and parcellated, therefore the time series have been saved in text files as .tsv
-and can easily be loaded into a dataframe. Nevertheless, the produced script should work also for other types of time series with causality in it.
+and can easily be loaded into a dataframe.
 
 ## Bivariate Causality Analysis
 <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/GrangerCausalityIllustration.svg" alt="GCwikipedia" width="400"/>
@@ -52,6 +52,15 @@ Three specialized multivariate approaches:
 - Supports conditional transfer entropy
 
 N.B. The multivariate implementations are not considered state-of-the-art and are not fully tested, please report any error or bug.
+
+## Visualization of effective connectivity
+
+- Plotting of directed graphs, also overlapping with tractography
+
+- Visualization of time series over structural connections (currently not working properly)
+
+<img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/vis_eff_conn.png" alt="visualization" width="400"/>
+
 
 ## Installation
 
@@ -128,6 +137,22 @@ Indeed, there is also a causal time series generator script to generate ground-t
     nl_x, nl_y = generator.nonlinear_coupled_system(n_points)
 ```
 
+
+
+## Visualization of effective connectivity example
+
+```python
+from effconnpy import  vis_effconn 
+
+node_file = "Node_AAL90.node"
+edge_file = "my_effconn.csv"
+    
+vis_effconn(node_file, edge_file, show_tractography=True)
+```
+This will show the overlay of a tractography from the HCP dataset over a connectome according to an atlas with given nodes coordinates, and the effective connectivity computed and saved in a csv file.
+If a structural connectivity matrix (non-effective) is passed, the function whill show arrows on both directions for all edges. 
+
+
 ## To be done
 1. Automatic selection of lags
 2. Extension with own work as Structurally constrained Granger causality A. Crimi Neuroimage 2021
@@ -145,5 +170,6 @@ Currently disabled, just open issues and I will follow up
 MIT License
 
 [![Star History Chart](https://api.star-history.com/svg?repos=alecrimi/effconnpy&type=Date)](https://star-history.com/#alecrimi/effconnpy)
+
 
 
