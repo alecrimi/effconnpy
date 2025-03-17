@@ -154,9 +154,11 @@ If a structural connectivity matrix (non-effective) is passed, the function whil
 
 ## Citation
 If you use the tool please refer to those papers
+
 ["Structurally constrained Granger causality" A. Crimi et al. Neuroimage 2021](https://www.sciencedirect.com/science/article/pii/S1053811921005644)
-and Reservoir Computing Causality (End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
-Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025)
+
+["End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence"
+Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025](https://ieeexplore.ieee.org/document/10839398)
 
 
 ## Contributing
