@@ -9,7 +9,6 @@
  
 <img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/logo.png" alt="logo" width="200"/>
 
-
 `Effconnpy` is a Python library for advanced causal inference and connectivity analysis in time series data, offering both bivariate and multivariate approaches.
 The toolbox assumes that neuroimging data (e.g. from Nifti files) have been already pre-processed e.g. with fMRI-prep, and parcellated, therefore the time series have been saved in text files as .tsv
 and can easily be loaded into a dataframe.
@@ -153,9 +152,9 @@ This will show the overlay of a tractography from the HCP dataset over a connect
 If a structural connectivity matrix (non-effective) is passed, the function whill show arrows on both directions for all edges. 
 
 
-## To be done
-1. Automatic selection of lags
-2. Extension with own work as Structurally constrained Granger causality A. Crimi Neuroimage 2021
+## Citation
+If you use the tool please refer to those papers
+["Structurally constrained Granger causality" A. Crimi et al. Neuroimage 2021](https://www.sciencedirect.com/science/article/pii/S1053811921005644)
 and Reservoir Computing Causality (End-to-End Stroke Imaging Analysis Using Effective Connectivity and Interpretable Artificial Intelligence
 Wojciech Ciezobka; Joan Falcó-Roget; Cemal Koba; Alessandro Crimi, IEEE Access 2025)
 
