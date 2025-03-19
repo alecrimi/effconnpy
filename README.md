@@ -59,8 +59,7 @@ N.B. The multivariate implementations are not considered state-of-the-art and ar
 - Visualization of time series over structural connections (currently not working properly)
 
 <img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/vis_eff_conn.png" alt="visualization" width="300" 
-  src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/lables.png" alt="visualization" width="300"/>
-<img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/effective_graidients.png" alt="visualization" width="300"/>
+  src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/lables.png" alt="visualization" width="300  src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/effective_graidients.png" alt="visualization" width="300"/>
 
 
 ## Installation
