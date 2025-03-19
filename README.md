@@ -54,7 +54,8 @@ N.B. The multivariate implementations are not considered state-of-the-art and ar
 
 ## Visualization of effective connectivity
 
-- Plotting of directed graphs, also overlapping with tractography
+- Plotting of directed graphs, also overlapping with tractography and node labels
+- Directionality of the connections as color gradients
 
 - Visualization of time series over structural connections (currently not working properly)
 
