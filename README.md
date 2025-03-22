@@ -57,7 +57,7 @@ N.B. The multivariate implementations are not considered state-of-the-art and ar
 - Plotting of directed graphs, also overlapping with tractography and node labels
 - Directionality of the connections as color gradients
 
-- Visualization of time series over structural connections (currently not working properly)
+- Visualization of time series over structural connections ((currently not working properly)[https://github.com/alecrimi/effconnpy/issues/8])
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/vis_eff_conn.png" alt="visualization" width="300"/>
@@ -153,7 +153,7 @@ edge_file = "my_effconn.csv"
 vis_effconn(node_file, edge_file, show_tractography=True)
 ```
 This will show the overlay of a tractography from the HCP dataset over a connectome according to an atlas with given nodes coordinates, and the effective connectivity computed and saved in a csv file.
-If a structural connectivity matrix (non-effective) is passed, the function whill show arrows on both directions for all edges. 
+If a structural connectivity matrix (non-effective) is passed, the function will show arrows on both directions for all edges. 
 
 
 ## Citation
