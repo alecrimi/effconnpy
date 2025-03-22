@@ -3,8 +3,9 @@ from fury import window, actor
 from dipy.io.streamline import load_trk
 import os
 import vtk
+import math
 
-def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography=True):
+def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography=True, show_node_names=False, label_size=2.0):
     """
     Load and visualize a .trk file with AAL90 connectome atlas overlay,
     with static arrows (cones) at the end of each connection.
@@ -20,6 +21,10 @@ def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography
         Path to the edge/connectivity matrix file
     show_tractography : bool, optional
         Whether to show the tractography data. Default is True.
+    show_node_names : bool, optional
+        Whether to display the names of the nodes next to them. Default is False.
+    label_size : float, optional
+        Uniform size for all node labels. Default is 2.0.
     """
     # Check if files exist
     for file_path in [trk_file_path, node_file, edge_file]:
@@ -184,14 +189,40 @@ def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography
         node_assembly = vtk.vtkAssembly()
         edge_assembly = vtk.vtkAssembly()
         arrow_assembly = vtk.vtkAssembly()
+        label_assembly = vtk.vtkAssembly()  # New assembly for labels
 
         # Lists to store actors for opacity control
         node_actors = []
         edge_actors = []
         arrow_actors = []
+        label_actors = []  # New list for label actors
+
+        # Function to orient labels horizontally always facing the camera
+        def create_billboard_text(text, position, size):
+            # Create a text source
+            text_source = vtk.vtkVectorText()
+            text_source.SetText(text)
+            text_source.Update()
+            
+            # Create a mapper for the text
+            text_mapper = vtk.vtkPolyDataMapper()
+            text_mapper.SetInputConnection(text_source.GetOutputPort())
+            
+            # Create follower actor (always faces camera)
+            text_actor = vtk.vtkFollower()
+            text_actor.SetMapper(text_mapper)
+            text_actor.SetPosition(position)
+            text_actor.SetScale(size, size, size)
+            text_actor.GetProperty().SetColor(1.0, 1.0, 1.0)  # White color
+            
+            # Rotate the text 90 degrees 
+            text_actor.RotateX(90)
+            text_actor.RotateY(180)
+            
+            return text_actor
 
         # Create manual spheres for nodes
-        for i, (coord, size) in enumerate(zip(adjusted_node_coords, node_sizes)):
+        for i, (coord, size, name) in enumerate(zip(adjusted_node_coords, node_sizes, node_names)):
             # Create sphere source
             sphere_source = vtk.vtkSphereSource()
             sphere_source.SetCenter(coord[0], coord[1], coord[2])
@@ -213,6 +244,23 @@ def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography
             scene.add(sphere_actor)
             node_assembly.AddPart(sphere_actor)
             node_actors.append(sphere_actor)
+
+            # Add node name labels if enabled
+            if show_node_names:
+                # Position slightly offset from node
+                label_position = [
+                    coord[0] + size * 1.2,
+                    coord[1] + size * 1.2,
+                    coord[2] + size * 1.2
+                ]
+                
+                # Create billboard text that will always face the camera and be horizontal
+                text_actor = create_billboard_text(name, label_position, label_size)
+                
+                # Add to scene
+                scene.add(text_actor)
+                label_assembly.AddPart(text_actor)
+                label_actors.append(text_actor)
 
         # Create edges and arrows
         for i, j in zip(i_indices, j_indices):
@@ -256,15 +304,21 @@ def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography
         scene.add(node_assembly)
         scene.add(edge_assembly)
         scene.add(arrow_assembly)
+        if show_node_names:
+            scene.add(label_assembly)
 
         # Add orientation markers
         scene.add(actor.axes())
 
         # Reset camera
         scene.reset_camera()
-        scene.set_camera(position=(0, -500, 0),
-                         focal_point=(0, 0, 0),
-                         view_up=(0, 0, 1))
+        camera = scene.set_camera(position=(0, -500, 0),
+                                 focal_point=(0, 0, 0),
+                                 view_up=(0, 0, 1))
+        
+        # Set the camera for all followers (the text labels)
+        for text_actor in label_actors:
+            text_actor.SetCamera(camera)
 
         # Create a show manager
         show_manager = window.ShowManager(scene,
@@ -277,6 +331,9 @@ def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography
         else:
             print(f"Rendering {len(node_coords)} atlas nodes (tractography disabled)")
         print(f"Total connections with arrows: {len(i_indices)}")
+        print(f"Node names display: {'Enabled' if show_node_names else 'Disabled'}")
+        if show_node_names:
+            print(f"Label size: Uniform {label_size}, horizontal orientation")
 
         # Start the visualization
         show_manager.start()
@@ -292,8 +349,16 @@ if __name__ == "__main__":
     node_file = "Node_AAL90.node"
     edge_file = "edge_AAL90_binary.edge"
 
-    # To show both tractography and graphs (default):
-    vis_effconn(node_file, edge_file, trk_file_path, show_tractography=True)
+    # Examples of different visualization options:
+    
+    # To show both tractography and graphs with node names:
+    vis_effconn(node_file, edge_file, trk_file_path, show_tractography=False, show_node_names=True, label_size=2.0)
+    
+    # To show both tractography and graphs without node names (default):
+    # vis_effconn(node_file, edge_file, trk_file_path, show_tractography=True, show_node_names=False)
 
-    # To show only the graphs (nodes and connections):
-    # vis_effconn(node_file, edge_file, trk_file_path, show_tractography=False)
+    # To show only the graphs with node names:
+    # vis_effconn(node_file, edge_file, trk_file_path, show_tractography=False, show_node_names=True, label_size=2.0)
+    
+    # To show only the graphs without node names:
+    # vis_effconn(node_file, edge_file, trk_file_path, show_tractography=False, show_node_names=False)
