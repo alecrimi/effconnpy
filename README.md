@@ -57,7 +57,7 @@ N.B. The multivariate implementations are not considered state-of-the-art and ar
 - Plotting of directed graphs, also overlapping with tractography and node labels
 - Directionality of the connections as color gradients
 
-- Visualization of time series over structural connections ((currently not working properly)[https://github.com/alecrimi/effconnpy/issues/8])
+- Visualization of time series over structural connections (currently not working properly[https://github.com/alecrimi/effconnpy/issues/8])
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/alecrimi/effconnpy/main/vis_eff_conn.png" alt="visualization" width="300"/>
