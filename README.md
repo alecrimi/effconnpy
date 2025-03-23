@@ -20,7 +20,7 @@ Two core classes provide bivariate causal inference methods:
 
 ### 1. CausalityAnalyzer
 Basic methods include:
-- Bivariate Granger Causality
+- Bivariate Granger Causality (traditional linear, and non-linear implemented by reservoir computing networks)
 - Bivariate Transfer Entropy
 - Bivariate Convergent Cross Mapping 
 
