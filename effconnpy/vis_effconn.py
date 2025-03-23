@@ -7,10 +7,11 @@ import math
 
 def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography=True, show_node_names=False, label_size=2.0):
     """
-    Load and visualize a .trk file with AAL90 connectome atlas overlay,
+    Load and visualize a connectome graph with potentially .trk file  overlay,
     with static arrows (cones) at the end of each connection.
-    Sliders control opacity of different visualization components.
+    Labels of the nodes can also be visualized
 
+    
     Parameters
     ----------
     trk_file_path : str
