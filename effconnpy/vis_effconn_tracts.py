@@ -9,7 +9,7 @@ import colorsys
 
 def vis_effconn(node_file, edge_file, trk_file_path="HCP.trk", show_tractography=True, show_background_tracts=False):
     """
-    Load and visualize a .trk file with AAL90 connectome atlas overlay,
+    Load and visualize a .trk file with overlay to a connectome atlas defining the directionality,
     with gradient shading of tracts based on region connectivity.
 
     Parameters
