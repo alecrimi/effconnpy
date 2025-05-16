@@ -7,9 +7,17 @@ from .utils import validate_input
 
 class EffectiveInformation:
     """
-    Effective Information calculation using KL divergence as defined in
+    Effective Information (EI) calculation using KL divergence as defined in
     Hoel et al., PNAS 2013. This class supports network construction
     from time series and computes EI and related measures.
+
+    By default this script uses a graph constructed by mutual information or correlation (as in functional connectivity)
+    and then validate the EI on that.    
+    Be aware that in Hoel et al. EI is computed over a transition model:
+    - A Markov chain, or
+    - A transition probability matrix, or
+    - A known mechanistic model, such as in cellular automata or digital organisms (e.g., Hopfield networks, Boolean logic circuits).
+    not from correlations or mutual information of time series.
     """
 
     def __init__(self, data: Union[np.ndarray, pd.DataFrame, nx.Graph, List[np.ndarray]]):
