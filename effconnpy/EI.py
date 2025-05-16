@@ -3,21 +3,14 @@ import pandas as pd
 from typing import Union, List, Optional, Tuple
 import networkx as nx
 from scipy import stats
+from collections import Counter
 from .utils import validate_input
 
 class EffectiveInformation:
     """
-    Effective Information (EI) calculation using KL divergence as defined in
+    Effective Information calculation using KL divergence as defined in
     Hoel et al., PNAS 2013. This class supports network construction
     from time series and computes EI and related measures.
-
-    By default this script uses a graph constructed by mutual information or correlation (as in functional connectivity)
-    and then validate the EI on that.    
-    Be aware that in Hoel et al. EI is computed over a transition model:
-    - A Markov chain, or
-    - A transition probability matrix, or
-    - A known mechanistic model, such as in cellular automata or digital organisms (e.g., Hopfield networks, Boolean logic circuits).
-    not from correlations or mutual information of time series.
     """
 
     def __init__(self, data: Union[np.ndarray, pd.DataFrame, nx.Graph, List[np.ndarray]]):
@@ -27,7 +20,7 @@ class EffectiveInformation:
             self.num_nodes = self.adjacency_matrix.shape[0]
             self.time_series = None
         else:
-            self.time_series =  validate_input(data) #data
+            self.time_series = data
             if len(self.time_series.shape) == 1:
                 self.num_nodes = 1
                 self.time_series = self.time_series.reshape(-1, 1)
@@ -36,37 +29,61 @@ class EffectiveInformation:
             self.G = None
             self.adjacency_matrix = None
 
-    def construct_network_from_timeseries(self, method: str = 'mutual_info',
-                                          threshold: float = 0.5,
-                                          absolute: bool = True) -> nx.Graph:
+    def construct_network_from_timeseries(self, binarize=True, n_bins=2):
+        """
+        Constructs a transition graph from time series data suitable for Effective Information (EI) calculation.
+
+        Parameters:
+        - binarize (bool): Whether to binarize the time series data.
+        - n_bins (int): Number of bins to discretize the data if not binarizing.
+
+        Returns:
+        - G (nx.DiGraph): Directed graph representing state transitions.
+        """
         if self.time_series is None:
             raise ValueError("No time series data available to construct network")
 
-        relationship_matrix = np.zeros((self.num_nodes, self.num_nodes))
-
-        if method == 'correlation':
-            corr_matrix = np.corrcoef(self.time_series.T)
-            relationship_matrix = corr_matrix
-
-        elif method == 'mutual_info':
-            for i in range(self.num_nodes):
-                for j in range(self.num_nodes):
-                    if i != j:
-                        bins = min(10, len(self.time_series) // 5)
-                        c_xy = np.histogram2d(self.time_series[:, i], self.time_series[:, j], bins=bins)[0]
-                        mi = self._mutual_information_from_joint(c_xy)
-                        relationship_matrix[i, j] = mi
+        # Step 1: Discretize time series data
+        if binarize:
+            # Binarize each node's time series based on median
+            discretized = (self.time_series > np.median(self.time_series, axis=0)).astype(int)
         else:
-            raise ValueError(f"Unknown method: {method}")
+            # Discretize into n_bins using quantiles
+            discretized = np.zeros_like(self.time_series, dtype=int)
+            for i in range(self.time_series.shape[1]):
+                bins = np.quantile(self.time_series[:, i], q=np.linspace(0, 1, n_bins + 1))
+                discretized[:, i] = np.digitize(self.time_series[:, i], bins[1:-1])
 
-        adjacency_matrix = np.zeros_like(relationship_matrix)
-        mask = np.abs(relationship_matrix) > threshold if absolute else relationship_matrix > threshold
-        adjacency_matrix[mask] = 1
-        np.fill_diagonal(adjacency_matrix, 0)
-        G = nx.from_numpy_array(adjacency_matrix, create_using=nx.DiGraph)
+        # Step 2: Create state representations
+        # Each state is a tuple representing the discretized values of all nodes at a time point
+        states = [tuple(row) for row in discretized]
+
+        # Step 3: Count transitions between consecutive states
+        transitions = Counter()
+        for i in range(len(states) - 1):
+            transitions[(states[i], states[i + 1])] += 1
+
+        # Step 4: Build transition probability matrix
+        transition_counts = {}
+        for (from_state, to_state), count in transitions.items():
+            if from_state not in transition_counts:
+                transition_counts[from_state] = Counter()
+            transition_counts[from_state][to_state] += count
+
+        # Normalize to get probabilities
+        transition_probs = {}
+        for from_state, to_states in transition_counts.items():
+            total = sum(to_states.values())
+            transition_probs[from_state] = {to_state: cnt / total for to_state, cnt in to_states.items()}
+
+        # Step 5: Construct directed graph
+        G = nx.DiGraph()
+        for from_state, to_states in transition_probs.items():
+            for to_state, prob in to_states.items():
+                G.add_edge(from_state, to_state, weight=prob)
 
         self.G = G
-        self.adjacency_matrix = adjacency_matrix
+        self.transition_probs = transition_probs
         return G
 
     def _mutual_information_from_joint(self, joint_probability: np.ndarray) -> float:
@@ -89,6 +106,46 @@ class EffectiveInformation:
     def _kl_divergence(self, p: np.ndarray, q: np.ndarray) -> float:
         mask = (p > 0) & (q > 0)
         return np.sum(p[mask] * np.log2(p[mask] / q[mask]))
+
+    def construct_channel_network(self, method: str = 'mutual_info', threshold: float = 0.1) -> nx.DiGraph:
+        """
+        Constructs a channel-based network using mutual information or correlation between channels.
+
+        Parameters:
+        - method (str): 'mutual_info' or 'correlation'
+        - threshold (float): threshold for edge inclusion
+
+        Returns:
+        - G (nx.DiGraph): directed graph
+        """
+        if self.time_series is None:
+            raise ValueError("No time series data available to construct network")
+
+        n = self.num_nodes
+        rel_matrix = np.zeros((n, n))
+
+        if method == 'correlation':
+            rel_matrix = np.corrcoef(self.time_series.T)
+        elif method == 'mutual_info':
+            for i in range(n):
+                for j in range(n):
+                    if i != j:
+                        bins = min(10, len(self.time_series) // 5)
+                        c_xy = np.histogram2d(self.time_series[:, i], self.time_series[:, j], bins=bins)[0]
+                        rel_matrix[i, j] = self._mutual_information_from_joint(c_xy)
+        else:
+            raise ValueError(f"Unknown method: {method}")
+
+        # Create adjacency matrix by thresholding
+        adj = np.zeros_like(rel_matrix)
+        adj[rel_matrix > threshold] = 1
+        np.fill_diagonal(adj, 0)
+
+        self.adjacency_matrix = adj
+        G = nx.from_numpy_array(adj, create_using=nx.DiGraph)
+        self.G = G
+        return G
+
 
     def effective_information(self, source: Union[int, List[int]],
                               target: Union[int, List[int]],
@@ -211,7 +268,9 @@ if __name__ == "__main__":
     # Example use
     time_series = np.random.randn(1000, 5)
     ei = EffectiveInformation(time_series)
-    network = ei.construct_network_from_timeseries(threshold=0.3)
+ 
+    # Build a network over the channels (not states)
+    network = ei.construct_channel_network(method='mutual_info', threshold=0.1)
 
     ei_value = ei.effective_information(source=0, target=1)
     print(f"Effective Information from node 0 to node 1: {ei_value}")
