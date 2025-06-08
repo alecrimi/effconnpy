@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 # Simulation parameters
 T = 100.0              # total time
